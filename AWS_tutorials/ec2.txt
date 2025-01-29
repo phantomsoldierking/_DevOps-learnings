@@ -1,0 +1,8 @@
+types:
+general
+compute optimized
+memory
+storage
+acclerate
+
+avilibility zones

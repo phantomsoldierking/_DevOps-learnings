@@ -1,0 +1,38 @@
+name: qwerty
+fruit: :"apple"
+job: 'swe'
+---
+# bio: | 
+# eqfwr qwrf qwrdf qwerty
+# qwedq qwe qwed
+---
+# message: >
+# this will 
+# all be single line
+---
+number: 21434
+float: 24.23
+booleanValue: No #n, N, false, False, FALSE
+
+# specify datatype
+
+zero: !!int 0
+positiveNum: !!int 45
+negativenum: !!int -23
+binaryNum: !!int 0b11001
+octalNum: !!int 06574
+hexa: !!int 0x45
+commaValues: !!int +540_000 # 540,000
+expo num: 6.023E23
+ 
+marks: !!float 23.23
+infinity: !!float .inf
+not a num: .nan
+
+boolen: !!bool false
+surname: !!null Null #null ~
+~ : this is a null key
+
+date: !!timestamp 2006-3-21
+India time: 2001-12-15T02:59:10 +5:30 #UTC + timezome value?
+

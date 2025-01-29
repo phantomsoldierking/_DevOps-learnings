@@ -1,0 +1,8 @@
+"apple" : "I am a red fruit"
+1 : "this is me"
+---
+# lists
+list:
+  - apple
+  - mango
+... 

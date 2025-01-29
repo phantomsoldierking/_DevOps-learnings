@@ -1,0 +1,71 @@
+student: !!seq
+ - marks
+ - name
+ - roll_num
+
+cities: [new Delhi, mumbai]
+
+# some times the keys of the sequence will be empty
+# sparse seq
+sparse seq:
+  -hey
+  -how
+  -
+  - Null
+  -sup
+
+# nested sequense
+
+
+# maps
+maps: !!map
+ key: value
+ key2: v2
+
+# nested map
+super:
+ sub: 
+  key1: v1
+  key2: v2
+ sub2:
+  key3: v3
+
+# pairs: keys may have duplicate values
+
+pair: !!pairs
+ - job: student
+ - job: husband
+# this will be an aray of hashtables
+
+# !!set will appow only to have unique values
+
+names: !!set
+ ? qwew
+ ? dsfgfg
+ ? dsrwgv
+
+# dict !!omap
+
+People: !!omap
+ - tyu:
+    name: qwerty
+    age: 23
+    height: 5.4
+ - qwe:
+    name: asdf
+    age: 24
+    height: 5.6
+
+# reausing some properties anchors
+liking: &like
+  fav fruit: mango
+  dislikes: papaya
+
+person: 
+  name: qadgfwfg
+  <<: *likes
+  dislikes: berries    # overide
+
+person2:
+  name: qwrfdg
+  <<: *likes

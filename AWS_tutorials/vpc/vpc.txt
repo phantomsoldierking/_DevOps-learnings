@@ -1,0 +1,28 @@
+NACL: network access control list  -- subnet level
+
+security group -- resource(EC2) level
+
+ 
+default vpc creation process:
+    create vpc
+    enable DNS hostnames
+    enable DNS resolutions
+    verifing vpc creation
+    create s3 endpoint
+    create subnets
+    create internet gateway
+    attach internet gate way to vpc
+    create route table
+    create route
+    associate route table
+    verify route table creation
+    associate s3 endpoint with private subnet route table
+
+NACL
+ inbound traffic rules
+ outbound traffic rules
+these rules are applied on the basis of the rule number in accending order
+
+How to Record SSH Sessions Established Through a Bastion Host
+https://aws.amazon.com/blogs/security/how-to-record-ssh-sessions-established-through-a-bastion-host/
+

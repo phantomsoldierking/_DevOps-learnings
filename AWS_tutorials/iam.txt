@@ -1,0 +1,13 @@
+I am service in aws
+
+users
+policies: In IAM, policies are sets of permissions that define what actions are allowed or denied for specific resources. 
+Policies are used to control access to resources within a system.
+
+groups: Groups are collections of users. By assigning permissions to a group, you can manage the permissions for
+ all users within that group collectively, rather than assigning permissions to each user individually.
+
+Roles: Roles are a way to bundle a set of permissions that can be assigned to users or groups. 
+Roles are often used to define a job function or responsibility within an organization, and 
+users or groups can assume these roles to gain the associated permissions.
+

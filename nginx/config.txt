@@ -1,0 +1,24 @@
+location:  /etc/nginx/nginx.conf
+
+# The main context is here, outside any other contexts
+. . .
+context {
+    . . .
+}
+
+# main context
+events {
+    # events context
+    . ..
+}
+
+# main context
+http {
+    # http context
+    server {
+        # first server context
+    }
+    server {
+        # second server context
+    }
+}

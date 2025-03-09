@@ -1,0 +1,386 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  This template is for an account without a pre-existing SageMaker Studio Domain & SageMaker User Profile - it creates these.   This template also includes the additional permissions which are required to run this tutorial 
+
+Parameters:
+  UserProfileName:
+    Type: String
+    Description: The user profile name for the SageMaker workshop
+    Default: 'studio-user'
+  DomainName:
+    Type: String
+    Description: The domain name of the Sagemaker studio instance
+    Default: 'StudioDomain'
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      datascience: "arn:aws:sagemaker:us-east-1:081325390199:image/jupyter-server-3"
+      datawrangler: "arn:aws:sagemaker:us-east-1:663277389841:image/sagemaker-data-wrangler-1.0"
+    us-east-2:
+      datascience: "arn:aws:sagemaker:us-east-2:429704687514:image/jupyter-server-3"
+      datawrangler: "arn:aws:sagemaker:us-east-2:415577184552:image/sagemaker-data-wrangler-1.0"
+    us-west-1:
+      datascience: "arn:aws:sagemaker:us-west-1:742091327244:image/jupyter-server-3"
+      datawrangler: "arn:aws:sagemaker:us-west-1:926135532090:image/sagemaker-data-wrangler-1.0"
+
+Resources:
+  LambdaExecutionRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - "sts:AssumeRole"
+      Path: /
+      ManagedPolicyArns:
+      - 'arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess'
+      - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
+      - 'arn:aws:iam::aws:policy/IAMFullAccess'
+      - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+
+  SageMakerExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Policies:
+      - PolicyName: iam-access
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          
+          - Effect: Allow
+            Action:
+            - iam:GetRole
+            - iam:GetRolePolicy
+            - iam:CreateRole
+            - iam:AttachRolePolicy
+            Resource: '*'
+      - PolicyName: pass-role
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          
+          - Effect: Allow
+            Action:
+            - iam:PassRole
+            Resource: 'arn:aws:iam::*:role/*'
+            Condition:
+              StringLike:
+                iam:PassedToService:
+                - sagemaker.amazonaws.com
+                - events.amazonaws.com
+      - PolicyName: kms-access
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          
+          - Effect: Allow
+            Action:
+            - kms:CreateKey
+            - kms:Get*
+            - kms:List*
+            Resource: '*'
+      - PolicyName: list-tags
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          
+          - Effect: Allow
+            Action:
+            - sagemaker:ListTags
+            Resource: '*'
+      - PolicyName: headless-execution-permissions
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          
+          - Effect: Allow
+            Action:
+            - events:TagResource
+            - events:DeleteRule
+            - events:PutTargets
+            - events:DescribeRule
+            - events:PutRule
+            - events:RemoveTargets
+            - events:DisableRule
+            - events:EnableRule
+            Resource: "*"
+            Condition:
+              StringEquals:
+                'aws:ResourceTag/sagemaker:is-scheduling-notebook-job': 'true'
+
+          - Effect: Allow
+            Action:
+            - s3:CreateBucket
+            - s3:PutBucketVersioning
+            - s3:PutEncryptionConfiguration
+            Resource: 'arn:aws:s3:::sagemaker-automated-execution-*'
+
+          - Effect: Allow
+            Action:
+            - sagemaker:AddTags
+            Resource:
+            - 'arn:aws:sagemaker:*:*:training-job/*'
+            - 'arn:aws:sagemaker:*:*:pipeline/*'
+
+          - Effect: Allow
+            Action:
+            - ec2:CreateNetworkInterface
+            - ec2:CreateNetworkInterfacePermission
+            - ec2:CreateVpcEndpoint
+            - ec2:DeleteNetworkInterface
+            - ec2:DeleteNetworkInterfacePermission
+            - ec2:DescribeDhcpOptions
+            - ec2:DescribeNetworkInterfaces
+            - ec2:DescribeRouteTables
+            - ec2:DescribeSecurityGroups
+            - ec2:DescribeSubnets
+            - ec2:DescribeVpcEndpoints
+            - ec2:DescribeVpcs
+            - ecr:BatchCheckLayerAvailability
+            - ecr:BatchGetImage
+            - ecr:GetDownloadUrlForLayer
+            - ecr:GetAuthorizationToken
+            - s3:ListBucket
+            - s3:GetBucketLocation
+            - s3:GetEncryptionConfiguration
+            - s3:PutObject
+            - s3:DeleteObject
+            - s3:GetObject
+            - sagemaker:DescribeDomain
+            - sagemaker:DescribeUserProfile
+            - sagemaker:DescribeSpace
+            - sagemaker:DescribeStudioLifecycleConfig
+            - sagemaker:DescribeImageVersion
+            - sagemaker:DescribeAppImageConfig
+            - sagemaker:CreateTrainingJob
+            - sagemaker:DescribeTrainingJob
+            - sagemaker:StopTrainingJob
+            - sagemaker:Search
+            - sagemaker:CreatePipeline
+            - sagemaker:DescribePipeline
+            - sagemaker:DeletePipeline
+            - sagemaker:StartPipelineExecution
+            - license-manager:ExtendLicenseConsumption
+            - license-manager:ListReceivedLicenses
+            - license-manager:GetLicense
+            - license-manager:CheckoutLicense
+            - license-manager:CheckInLicense
+            Resource: "*"
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        
+        - Effect: Allow
+          Principal:
+            Service:
+            - sagemaker.amazonaws.com
+            - events.amazonaws.com
+            - forecast.amazonaws.com
+          Action:
+          - sts:AssumeRole
+
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+
+      ManagedPolicyArns:
+      - 'arn:aws:iam::aws:policy/AmazonSageMakerFullAccess'
+      - 'arn:aws:iam::aws:policy/AWSCloudFormationFullAccess'
+      - 'arn:aws:iam::aws:policy/AWSCodePipeline_FullAccess'
+      - 'arn:aws:iam::aws:policy/AmazonSageMakerPipelinesIntegrations'
+
+  LambdaExecutionPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Path: /
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        - Sid: CloudWatchLogsPermissions
+          Effect: Allow
+          Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Resource: !Sub "arn:${AWS::Partition}:logs:*:*:*"
+        - Sid: SageMakerDomainPermission
+          Effect: Allow
+          Action:
+          - sagemaker:ListDomains
+          - sagemaker:CreateDomain
+          - sagemaker:DescribeDomain
+          - sagemaker:DeleteDomain
+          - sagemaker:UpdateDomain
+          - sagemaker:ListUserProfiles
+          - sagemaker:CreateUserProfile
+          - sagemaker:UpdateUserProfile
+          - sagemaker:DeleteUserProfile
+          - sagemaker:DescribeUserProfile
+          - sagemaker:ListApps
+          - sagemaker:CreateApp
+          - sagemaker:DescribeApp
+          - sagemaker:DeleteApp
+          - sagemaker:UpdateApp
+          Resource:
+          - !Sub "arn:${AWS::Partition}:sagemaker:*:*:domain/*"
+          - !Sub "arn:${AWS::Partition}:sagemaker:*:*:user-profile/*"
+          - !Sub "arn:${AWS::Partition}:sagemaker:*:*:app/*"
+        - Sid: SageMakerProjectsPermission
+          Effect: Allow
+          Action:
+          - servicecatalog:AcceptPortfolioShare
+          - sagemaker:EnableSagemakerServicecatalogPortfolio
+          - sagemaker:DisableSagemakerServicecatalogPortfolio
+          Resource: '*'
+        - Sid: SageMakerExecPassRole
+          Effect: Allow
+          Action:
+          - iam:PassRole
+          Resource: !GetAtt SageMakerExecutionRole.Arn
+      Roles:
+      - !Ref LambdaExecutionRole
+  # Adding a wait time after SageMakerExecutionRole creation
+  # this is due to https://t.corp.amazon.com/P45031666
+  DomainDeploymentDelay:
+    Type: 'Custom::Delay'
+    DependsOn: SageMakerExecutionRole
+    Properties:
+      ServiceToken: !GetAtt DelayLambda.Arn
+      TimeToWait: 300
+
+  DelayLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Handler: "index.handler"
+      Timeout: 660
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.12
+      Code:
+        ZipFile: |
+          import json
+          import cfnresponse
+          import time
+          def handler(event, context):
+            time_to_wait = int(event['ResourceProperties']['TimeToWait'])
+            print(f'Waiting for {time_to_wait} seconds')
+            time.sleep(time_to_wait)
+            print(f'Waiting finished')
+            cfnresponse.send(event, context, cfnresponse.SUCCESS, {},'')
+
+  DefaultVpcLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: CFGetDefaultVpcIdTut
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import cfnresponse
+          import logging
+          import traceback
+
+          ec2 = boto3.client('ec2')
+
+          def lambda_handler(event, context):     
+            try:         
+              if 'RequestType' in event and event['RequestType'] == 'Create':
+                  vpc_id = get_default_vpc_id()
+                  subnets =  get_subnets_for_vpc(vpc_id)
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {'VpcId': vpc_id , "Subnets" : subnets}, '')
+              else:
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, {},'')
+            except:
+              logger.exception(f"CFGetDefaultVpcIdTut:failed :{traceback.format_exc()}")
+              cfnresponse.send(event, context, cfnresponse.FAILED, {})
+
+          def get_default_vpc_id():
+              vpcs = ec2.describe_vpcs(Filters=[{'Name': 'is-default', 'Values': ['true']}])
+              vpcs = vpcs['Vpcs']
+              vpc_id = vpcs[0]['VpcId']
+              return vpc_id
+
+
+          def get_subnets_for_vpc(vpcId):
+              response = ec2.describe_subnets(
+                  Filters=[
+                      {
+                          'Name': 'vpc-id',
+                          'Values': [vpcId]
+                      }
+                  ]
+              )
+              subnet_ids = []
+              for subnet in response['Subnets']:
+                  subnet_ids.append(subnet['SubnetId'])
+              return subnet_ids 
+      Description: Return default VPC ID and Subnets
+      Handler: index.lambda_handler
+      MemorySize: 512
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.12
+      Timeout: 5
+  DefaultVpcFinder:
+    Type: Custom::ResourceForFindingDefaultVpc
+    Properties:
+      ServiceToken: !GetAtt DefaultVpcLambda.Arn
+
+  StudioDomain:
+    Type: AWS::SageMaker::Domain
+    DependsOn: DomainDeploymentDelay
+    Properties:
+      AppNetworkAccessType: PublicInternetOnly
+      AuthMode: IAM
+      DefaultUserSettings:
+        ExecutionRole: !GetAtt SageMakerExecutionRole.Arn
+      DomainName: !Ref DomainName
+      SubnetIds: !GetAtt DefaultVpcFinder.Subnets
+      VpcId: !GetAtt DefaultVpcFinder.VpcId
+
+  StudioUserProfile:
+    Type: AWS::SageMaker::UserProfile
+    Properties:
+      DomainId: !GetAtt StudioDomain.DomainId
+      UserProfileName: !Ref UserProfileName
+      UserSettings:
+        ExecutionRole: !GetAtt SageMakerExecutionRole.Arn
+        JupyterServerAppSettings:
+          DefaultResourceSpec:
+            SageMakerImageArn: !FindInMap
+              - RegionMap
+              - !Ref 'AWS::Region'
+              - datascience
+
+  ### S3 Bucket similar to the one created by the create domain action in the UI
+  StudioBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Join
+        - "-"
+        - - "sagemaker-studio"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split
+                  - "/"
+                  - !Ref "AWS::StackId"
+
+  JupyterApp:
+    Type: AWS::SageMaker::App
+    DependsOn: StudioUserProfile
+    Properties:
+      AppName: default
+      AppType: JupyterServer
+      DomainId: !GetAtt StudioDomain.DomainId
+      UserProfileName: !Ref UserProfileName

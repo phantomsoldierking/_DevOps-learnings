@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: log-collector
+spec:
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    spec:
+      containers:
+      - name: fluentd
+        image: fluentd:latest

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: redis-replicaset
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:6.2
+        ports:
+        - containerPort: 6379
+
+# services
+# Service Capabilities:
+#     Stable Network Identity: Provides a fixed IP and DNS name to a group of Pods.
+#     Load Balancing: Distributes traffic evenly across the Pods it manages.
+#     Pod Discovery: Automatically discovers and routes to Pods that match its selector labels.
+
+# Types of Services:
+#     ClusterIP: Exposes the Service internally within the cluster.
+#     NodePort: Exposes the Service on each node’s IP at a static port.
+#     LoadBalancer: Exposes the Service externally using a cloud provider’s load balancer.
+#     ExternalName: Maps the Service to an external DNS name.

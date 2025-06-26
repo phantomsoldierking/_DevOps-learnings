@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongo
+spec:
+  serviceName: mongo-service
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:5.0
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: mongo-data
+          mountPath: /data/db
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 10Gi
+
+# Stable Network Identity: Each pod has a predictable name (e.g., app-0, app-1).
+# Persistent Storage: Each pod gets its own persistent volume, which is retained even after the pod is deleted.
+# Scaling and Updates: Pods are created, deleted, and updated in a defined sequence.
+# Resilience: Ensures data consistency and availability in stateful workloads.
+
+
+# example of configMap
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: app-config
+# data:
+#   DATABASE_HOST: db.example.com
+#   DATABASE_PORT: "5432"
+#   LOG_LEVEL: info

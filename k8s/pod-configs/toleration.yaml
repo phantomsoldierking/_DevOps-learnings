@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: db-pod
+spec:
+  tolerations:
+  - key: "dedicated"
+    operator: "Equal"
+    value: "db"
+    effect: "NoSchedule"
+  containers:
+  - name: postgres
+    image: postgres
+    resources:
+      ###res
+      requests:
+        memory: "256Mi"
+        cpu: "250m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+
+# kubectl taint nodes <node-name> <key>=<value>:<effect>
+
+# <key>: Identifier for the taint (e.g., environment)
+# <value>: A descriptive value (e.g., test)
+# <effect>: Defines how the taint behaves:
+# NoSchedule: Prevents scheduling unless the Pod has a matching toleration.
+# PreferNoSchedule: Avoids scheduling if possible but allows it if no other options exist.
+# NoExecute: Evicts existing Pods that don't tolerate the taint.
+# eg: kubectl taint nodes node-1 dedicated=db:NoSchedule
+# kubectl taint nodes node-1 dedicated=db:NoSchedule-
+# The - at the end removes the taint.

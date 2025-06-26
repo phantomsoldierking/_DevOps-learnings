@@ -1,0 +1,24 @@
+# similarly rediness probe is also done
+apiVersion: v1
+kind: Pod
+metadata:
+  name: database
+spec:
+  containers:
+  - name: db-container
+    image: db-image:latest
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "250m"
+      limits:
+        memory: "256Mi"
+        cpu: "500m"
+    livenessProbe:
+      tcpSocket:
+        port: 3306
+      initialDelaySeconds: 5
+      periodSeconds: 10
+
+# The livenessProbe attempts to connect to the database on port 3306 using TCP.
+# It checks the pod’s health every 10 seconds, starting after an initial delay of 5 seconds.

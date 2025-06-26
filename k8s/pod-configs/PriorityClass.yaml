@@ -1,0 +1,37 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: high-priority
+value: 1000
+preemptionPolicy: PreemptLowerPriority
+globalDefault: false
+
+# After defining a PriorityClass, assign it to a Pod:
+
+# apiVersion: v1
+# kind: Pod
+# metadata:
+#   name: critical-app
+# spec:
+#   priorityClassName: high-priority
+#   containers:
+#     - name: app
+#       image: my-app
+
+#   A high-priority Pod cannot be scheduled due to lack of resources.
+#   Kubernetes identifies lower-priority Pods that can be evicted.
+#   The lower-priority Pods are terminated.
+#   The high-priority Pod is scheduled.
+
+# Controlling Preemption
+# By setting preemptionPolicy: Never, you can prevent a Pod from evicting other workloads:
+
+# apiVersion: scheduling.k8s.io/v1
+# kind: PriorityClass
+# metadata:
+#   name: non-preempting-priority
+# value: 500
+# preemptionPolicy: Never
+
+# This ensures that Pods with this priority will not preempt lower-priority Pods.
+# removing : kubectl delete priorityclass high-priority

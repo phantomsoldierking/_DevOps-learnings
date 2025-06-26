@@ -1,5 +1,6 @@
 ArgoCD
 helm
 prometheus-grafana monitoring pipeline
+LOKI stack
 CI-CD complete pipeline and other tools
 Fargate

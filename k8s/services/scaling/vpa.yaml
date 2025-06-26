@@ -1,0 +1,33 @@
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: webapp-vpa
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: webapp
+  updatePolicy:
+    updateMode: "Auto" # Options: "Off", "Auto", "Initial"
+  resourcePolicy:
+    containerPolicies:
+    - containerName: "*"
+      minAllowed:
+        cpu: "100m"
+        memory: "128Mi"
+      maxAllowed:
+        cpu: "2"
+        memory: "4Gi"
+      controlledResources: [ "cpu", "memory" ]
+
+# targetRef – Specifies the deployment (webapp) for VPA.
+# updatePolicy.updateMode – Set to Auto, meaning VPA will automatically adjust resources.
+# resourcePolicy.containerPolicies – Defines min/max CPU and memory limits for all containers ("*").
+
+# To apply the VPA configuration: kubectl apply -f vpa.yaml
+
+# To check VPA recommendations: kubectl get vpa
+
+# To describe recommendations: kubectl describe vpa webapp-vpa
+
+# To delete a VPA: kubectl delete vpa webapp-vpa

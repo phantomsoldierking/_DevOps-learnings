@@ -1,0 +1,47 @@
+DevOps-learnings/k8s/practice   main  ? ❯ kubectl describe pod nginx-pod                                                  17:08 
+Name:             nginx-pod
+Namespace:        default
+Priority:         0
+Service Account:  default
+Node:             cl3-worker2/172.18.0.6
+Start Time:       Tue, 08 Jul 2025 14:08:29 +0530
+Labels:           env=demo
+                  type=frontend
+Annotations:      <none>
+Status:           Running
+IP:               10.244.2.3
+IPs:
+  IP:  10.244.2.3
+Containers:
+  nginx-container:
+    Container ID:   containerd://6ad493ea4ff72b9ef8c1700b561ef63a4471ffe7b1f0fa2dccbdd5e9a41016da
+    Image:          nginx
+    Image ID:       docker.io/library/nginx@sha256:93230cd54060f497430c7a120e2347894846a81b6a5dd2110f7362c5423b4abc
+    Port:           80/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Tue, 08 Jul 2025 14:08:32 +0530
+    Ready:          True
+    Restart Count:  0
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-hr4bk (ro)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       True 
+  ContainersReady             True 
+  PodScheduled                True 
+Volumes:
+  kube-api-access-hr4bk:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:                      <none>
